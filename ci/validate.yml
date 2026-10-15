@@ -1,0 +1,26 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover tests -v
+      - name: Validate main skill
+        run: python skill-forge-ultra/scripts/validate_skill.py skill-forge-ultra
+      - name: Validate examples
+        run: for d in examples/*/; do python skill-forge-ultra/scripts/validate_skill.py "$d"; done
+      - name: Package
+        run: python skill-forge-ultra/scripts/package_skill.py skill-forge-ultra dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skill-forge-ultra.skill
+          path: dist/skill-forge-ultra.skill
